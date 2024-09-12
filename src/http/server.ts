@@ -4,10 +4,10 @@ import {
   validatorCompiler,
   type ZodTypeProvider,
 } from 'fastify-type-provider-zod'
-import { createGoal } from '../functions/create-goal'
-import z, { string } from 'zod'
-import { getWeekPendingGoals } from '../functions/get-week-pending-goals'
-import { createGoalCompletion } from '../functions/create-goal-completion'
+import { createGoalRoute } from './routes/create-goal'
+import { createCompletionRoute } from './routes/create-completion'
+import { getPendingGoalsRoute } from './routes/get-pending-goals'
+import { getWeekSummaryRoutes } from './routes/get-week-summary'
 
 //Cria uma nova instância do framework Fastify e a armazena na variável app. Essa instância será usada para definir as rotas, middlewares e outras configurações do servidor
 const app = fastify().withTypeProvider<ZodTypeProvider>()
@@ -15,49 +15,11 @@ const app = fastify().withTypeProvider<ZodTypeProvider>()
 app.setValidatorCompiler(validatorCompiler)
 app.setSerializerCompiler(serializerCompiler)
 
-app.get('/pending-goals', async () => {
-  const { pendingGoals } = await getWeekPendingGoals()
+app.register(createGoalRoute)
+app.register(createCompletionRoute)
+app.register(getPendingGoalsRoute)
+app.register(getWeekSummaryRoutes)
 
-  return { pendingGoals }
-})
-
-app.post(
-  '/goals',
-  {
-    schema: {
-      body: z.object({
-        title: z.string(),
-        desiredWeeklyFrequency: z.number().int().min(1).max(7),
-      }),
-    },
-  },
-  async request => {
-    const { title, desiredWeeklyFrequency } = request.body
-
-    await createGoal({
-      title,
-      desiredWeeklyFrequency,
-    })
-  }
-)
-
-app.post(
-  '/  ',
-  {
-    schema: {
-      body: z.object({
-        goalId: z.string(),
-      }),
-    },
-  },
-  async request => {
-    const { goalId } = request.body
-
-    await createGoalCompletion({
-      goalId,
-    })
-  }
-)
 // Chama o método listen da instância do Fastify para iniciar o servidor.
 app
   .listen({

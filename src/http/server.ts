@@ -8,9 +8,14 @@ import { createGoalRoute } from './routes/create-goal'
 import { createCompletionRoute } from './routes/create-completion'
 import { getPendingGoalsRoute } from './routes/get-pending-goals'
 import { getWeekSummaryRoutes } from './routes/get-week-summary'
+import fastifyCors from '@fastify/cors'
 
 //Cria uma nova instância do framework Fastify e a armazena na variável app. Essa instância será usada para definir as rotas, middlewares e outras configurações do servidor
 const app = fastify().withTypeProvider<ZodTypeProvider>()
+
+app.register(fastifyCors, {
+  origin: '*',
+})
 
 app.setValidatorCompiler(validatorCompiler)
 app.setSerializerCompiler(serializerCompiler)
